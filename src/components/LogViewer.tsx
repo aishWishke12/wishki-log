@@ -29,7 +29,17 @@ type LogViewerProps = {
   appliedLimit: number;
   appliedStartDate: string | null;
   appliedEndDate: string | null;
+  env: string;
+  apiBase: string;
 };
+
+async function logout() {
+  try {
+    await fetch("/api/logout", { method: "POST" });
+  } finally {
+    window.location.href = "/login";
+  }
+}
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -222,7 +232,10 @@ export function LogViewer({
   appliedLimit,
   appliedStartDate,
   appliedEndDate,
+  env,
+  apiBase,
 }: LogViewerProps) {
+  const apiHost = apiBase.replace(/^https?:\/\//, "");
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
@@ -373,7 +386,7 @@ export function LogViewer({
           <div className="space-y-3">
             <div className="rounded-xl border border-zinc-200/90 bg-white/90 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950/70">
               <p className="truncate font-mono text-[10px] text-zinc-700 dark:text-zinc-300">
-                api.wishki.in/api/logs
+                {apiHost}/api/logs
               </p>
               <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
                 <span>{appliedLimit}</span>
@@ -661,12 +674,33 @@ export function LogViewer({
       <div className="flex min-h-0 min-w-0 flex-1 flex-col border-zinc-200 dark:border-zinc-800">
         <header className="shrink-0 border-b border-zinc-200/90 bg-white/95 px-4 py-2.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 md:px-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h1 className="text-base font-semibold tracking-tight md:text-lg">
-              Logs
-            </h1>
-            <p className="font-mono text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
-              {error ? "—" : `${filteredSorted.length}/${initialLogs.length}`}
-            </p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold tracking-tight md:text-lg">
+                Logs
+              </h1>
+              <span
+                className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
+                  env === "prod"
+                    ? "bg-red-500/12 text-red-800 ring-red-500/30 dark:text-red-200"
+                    : "bg-amber-500/12 text-amber-950 ring-amber-500/30 dark:text-amber-100"
+                }`}
+                title={apiHost}
+              >
+                {env === "prod" ? "prod" : "staging"}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="font-mono text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
+                {error ? "—" : `${filteredSorted.length}/${initialLogs.length}`}
+              </p>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-[10px] font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Log out
+              </button>
+            </div>
           </div>
         </header>
 

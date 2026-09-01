@@ -2,13 +2,23 @@ import moment from "moment-timezone";
 
 import type { LogsApiResponse } from "@/types/log";
 
-const LOGS_ORIGIN = "https://api.wishki.in/api/logs";
-
 export const DEFAULT_LOG_LIMIT = 1000;
 export const LOG_LIMIT_MIN = 50;
 export const LOG_LIMIT_MAX = 10000;
 
+/** Thrown when the logs API rejects the bearer token (401/403). */
+export class LogsAuthError extends Error {
+  constructor(message = "Session expired") {
+    super(message);
+    this.name = "LogsAuthError";
+  }
+}
+
 export type FetchLogsOptions = {
+  /** API origin for the chosen environment, e.g. https://api.wishki.in */
+  apiBase: string;
+  /** Bearer token from admin login. */
+  token: string;
   limit?: number;
   startDate?: string;
   endDate?: string;
@@ -43,10 +53,10 @@ export function parseApiDateParam(raw: string | undefined | null): string | null
 }
 
 export async function fetchLogs(
-  opts: FetchLogsOptions = {},
+  opts: FetchLogsOptions,
 ): Promise<LogsApiResponse> {
   const limit = clampLogLimit(opts.limit);
-  const u = new URL(LOGS_ORIGIN);
+  const u = new URL("/api/logs", opts.apiBase);
   u.searchParams.set("limit", String(limit));
 
   const start =
@@ -61,7 +71,17 @@ export async function fetchLogs(
   if (start) u.searchParams.set("startDate", start);
   if (end) u.searchParams.set("endDate", end);
 
-  const res = await fetch(u.toString(), { cache: "no-store" });
+  const res = await fetch(u.toString(), {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${opts.token}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    throw new LogsAuthError();
+  }
 
   if (!res.ok) {
     throw new Error(`Logs API returned ${res.status}`);

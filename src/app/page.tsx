@@ -1,6 +1,11 @@
+import { redirect } from "next/navigation";
+
 import { LogViewer, type LogViewerPagination } from "@/components/LogViewer";
+import { TokenRefresher } from "@/components/TokenRefresher";
+import { getSession } from "@/lib/auth";
 import {
   fetchLogs,
+  LogsAuthError,
   parseApiDateParam,
   parseLimitFromSearch,
 } from "@/lib/logs";
@@ -19,7 +24,13 @@ export default async function Home({
 }: {
   searchParams: Promise<RawSearch>;
 }) {
+  const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+
   const sp = await searchParams;
+  const alreadyReauthed = pick(sp.reauthed) === "1";
 
   const limit = parseLimitFromSearch(pick(sp.limit));
 
@@ -35,6 +46,8 @@ export default async function Home({
 
   try {
     const json = await fetchLogs({
+      apiBase: session.apiBase,
+      token: session.token,
       limit,
       startDate: appliedStartDate ?? undefined,
       endDate: appliedEndDate ?? undefined,
@@ -48,17 +61,26 @@ export default async function Home({
       error = "Unexpected API response.";
     }
   } catch (e) {
+    if (e instanceof LogsAuthError) {
+      // Try a refresh once; if we've already been through it, hard logout.
+      redirect(alreadyReauthed ? "/api/logout" : "/api/reauth");
+    }
     error = e instanceof Error ? e.message : "Failed to load logs.";
   }
 
   return (
-    <LogViewer
-      logs={logs}
-      error={error}
-      pagination={pagination}
-      appliedLimit={limit}
-      appliedStartDate={appliedStartDate}
-      appliedEndDate={appliedEndDate}
-    />
+    <>
+      <TokenRefresher />
+      <LogViewer
+        logs={logs}
+        error={error}
+        pagination={pagination}
+        appliedLimit={limit}
+        appliedStartDate={appliedStartDate}
+        appliedEndDate={appliedEndDate}
+        env={session.env}
+        apiBase={session.apiBase}
+      />
+    </>
   );
 }
