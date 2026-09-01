@@ -4,19 +4,24 @@ import { loadLogsPage, type RawSearch } from "@/lib/logs-page";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home({
+export default async function ServiceLogs({
+  params,
   searchParams,
 }: {
+  params: Promise<{ service: string }>;
   searchParams: Promise<RawSearch>;
 }) {
-  const sp = await searchParams;
+  const [{ service: rawService }, sp] = await Promise.all([params, searchParams]);
+  const service = decodeURIComponent(rawService);
   const data = await loadLogsPage(sp);
+
+  const logs = data.logs.filter((l) => l.service === service);
 
   return (
     <>
       <TokenRefresher />
       <LogViewer
-        logs={data.logs}
+        logs={logs}
         error={data.error}
         pagination={data.pagination}
         appliedLimit={data.appliedLimit}
@@ -26,7 +31,7 @@ export default async function Home({
         apiBase={data.session.apiBase}
         allServices={data.allServices}
         serviceCounts={data.serviceCounts}
-        activeService={null}
+        activeService={service}
       />
     </>
   );

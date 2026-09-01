@@ -12,6 +12,7 @@ import moment from "moment-timezone";
 
 import { LogsFetchControls } from "@/components/LogsFetchControls";
 import { MetadataObjectView } from "@/components/MetadataObjectView";
+import { ServiceTabs } from "@/components/ServiceTabs";
 import { formatUtcPointIst } from "@/lib/logs";
 import type { LogRecord } from "@/types/log";
 
@@ -31,6 +32,12 @@ type LogViewerProps = {
   appliedEndDate: string | null;
   env: string;
   apiBase: string;
+  /** Full service roster, independent of the current fetch window. */
+  allServices: string[];
+  /** Log count per service within the current fetch window. */
+  serviceCounts: Record<string, number>;
+  /** Non-null when viewing a single service's page. */
+  activeService: string | null;
 };
 
 async function logout() {
@@ -234,6 +241,9 @@ export function LogViewer({
   appliedEndDate,
   env,
   apiBase,
+  allServices,
+  serviceCounts,
+  activeService,
 }: LogViewerProps) {
   const apiHost = apiBase.replace(/^https?:\/\//, "");
   const [levelFilter, setLevelFilter] = useState<string>("all");
@@ -270,9 +280,12 @@ export function LogViewer({
   }, [initialLogs]);
 
   const uniqueServices = useMemo(() => {
-    const set = new Set(initialLogs.map((l) => l.service).filter(Boolean));
+    const set = new Set<string>(allServices.filter(Boolean));
+    for (const l of initialLogs) {
+      if (l.service) set.add(l.service);
+    }
     return [...set].sort((a, b) => a.localeCompare(b));
-  }, [initialLogs]);
+  }, [allServices, initialLogs]);
 
   useEffect(() => {
     setExcludedServices((prev) =>
@@ -589,6 +602,7 @@ export function LogViewer({
               </label>
             </details>
 
+            {activeService === null && (
             <details
               open
               className="rounded-xl border border-zinc-200/90 bg-white/80 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950/60"
@@ -666,6 +680,7 @@ export function LogViewer({
                 )}
               </div>
             </details>
+            )}
           </div>
         </div>
       </aside>
@@ -674,9 +689,9 @@ export function LogViewer({
       <div className="flex min-h-0 min-w-0 flex-1 flex-col border-zinc-200 dark:border-zinc-800">
         <header className="shrink-0 border-b border-zinc-200/90 bg-white/95 px-4 py-2.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 md:px-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold tracking-tight md:text-lg">
-                Logs
+            <div className="flex min-w-0 items-center gap-2">
+              <h1 className="min-w-0 truncate text-base font-semibold tracking-tight md:text-lg">
+                {activeService ?? "Logs"}
               </h1>
               <span
                 className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
@@ -703,6 +718,12 @@ export function LogViewer({
             </div>
           </div>
         </header>
+
+        <ServiceTabs
+          services={allServices}
+          counts={serviceCounts}
+          activeService={activeService}
+        />
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 md:px-5 md:py-4">
           {error ? (

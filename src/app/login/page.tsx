@@ -167,17 +167,15 @@ export default function LoginPage() {
   return (
     <div className="flex h-[100dvh] w-full items-center justify-center bg-zinc-100 px-4 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
       <div className="w-full max-w-sm rounded-2xl border border-zinc-200/95 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
-        <h1 className="text-lg font-semibold tracking-tight">Wishki Log</h1>
-        <p className="mt-1 text-[12px] text-zinc-500 dark:text-zinc-400">
+        <p className="text-[16px] font-bold text-zinc-500 dark:text-zinc-400">
           {step === "credentials"
             ? "Admin sign in"
             : "Enter the code from your authenticator app"}
         </p>
 
         {step === "credentials" ? (
-          <form onSubmit={onCredentialsSubmit} className="mt-5 flex flex-col gap-3">
+          <form onSubmit={onCredentialsSubmit} className="mt-2 flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <span className={labelClass}>Environment</span>
               <div className="grid grid-cols-2 gap-1 rounded-xl border border-zinc-200 p-0.5 dark:border-zinc-700">
                 {ENV_OPTIONS.map((opt) => (
                   <button
@@ -194,7 +192,6 @@ export default function LoginPage() {
                   </button>
                 ))}
               </div>
-              <span className="font-mono text-[10px] text-zinc-400">{host}</span>
             </div>
 
             <label className="flex flex-col gap-1.5">
