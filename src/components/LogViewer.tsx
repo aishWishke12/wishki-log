@@ -158,6 +158,10 @@ function LogEntryCard({ log, index }: { log: LogRecord; index: number }) {
   const idShort =
     log._id.length >= 14 ? `${log._id.slice(0, 8)}…${log._id.slice(-5)}` : log._id;
   const levelTone = normalizeLevel(log.level);
+  const hasMeta =
+    !!log.metadata &&
+    typeof log.metadata === "object" &&
+    Object.keys(log.metadata).length > 0;
 
   const levelBadgeClass =
     levelTone === "error"
@@ -172,19 +176,16 @@ function LogEntryCard({ log, index }: { log: LogRecord; index: number }) {
 
   return (
     <article
-      className="group cursor-pointer overflow-hidden rounded-lg border border-zinc-200/90 bg-white shadow-sm ring-black/6 transition hover:ring-1 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-white/9"
+      className="group overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs ring-1 ring-transparent transition-all hover:border-zinc-300 hover:shadow-sm hover:ring-black/[0.04] dark:border-zinc-800/80 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:hover:ring-white/[0.06]"
       aria-labelledby={`log-${log._id}-message`}
-      onClick={() => setMetaOpen((open) => !open)}
     >
-      <div
-        className={`border-l-[3px] px-3 py-2 dark:from-transparent ${borderAccent}`}
-      >
+      <div className={`border-l-[3px] px-3 py-2 ${borderAccent}`}>
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[11px] leading-tight">
-          <span className="shrink-0 font-mono tabular-nums text-zinc-400 dark:text-zinc-600">
+          <span className="shrink-0 font-mono tabular-nums text-zinc-300 dark:text-zinc-600">
             #{index + 1}
           </span>
           <span
-            className={`inline-flex shrink-0 items-center rounded px-1 py-px text-[9px] font-bold uppercase tracking-wide ring-1 ring-inset ${levelBadgeClass}`}
+            className={`inline-flex shrink-0 items-center rounded-md px-1.5 py-px text-[9px] font-bold uppercase tracking-wide ring-1 ring-inset ${levelBadgeClass}`}
           >
             {log.level}
           </span>
@@ -209,25 +210,25 @@ function LogEntryCard({ log, index }: { log: LogRecord; index: number }) {
             {idShort}
           </span>
         </div>
-      </div>
 
-      <div className="border-t border-zinc-100 px-3 py-2 dark:border-zinc-800">
         <p
           id={`log-${log._id}-message`}
-          className="whitespace-pre-wrap break-words text-[13px] leading-snug text-zinc-900 dark:text-zinc-100"
+          className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-snug text-zinc-900 dark:text-zinc-100"
         >
           {log.message}
         </p>
       </div>
 
-      <div className="border-t border-dashed border-zinc-100 px-3 pb-2 pt-2 dark:border-zinc-800">
-        <MetadataObjectView
-          value={log.metadata}
-          className="mt-0"
-          open={metaOpen}
-          onOpenChange={setMetaOpen}
-        />
-      </div>
+      {hasMeta && (
+        <div className="border-t border-zinc-100 px-3 py-2 dark:border-zinc-800/80">
+          <MetadataObjectView
+            value={log.metadata}
+            className="mt-0"
+            open={metaOpen}
+            onOpenChange={setMetaOpen}
+          />
+        </div>
+      )}
     </article>
   );
 }
@@ -392,25 +393,27 @@ export function LogViewer({
     <div className="flex h-[100dvh] min-h-0 w-full flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 md:flex-row">
       {/* Left (top on narrow) · filters & API */}
       <aside
-        className="flex max-h-[min(48vh,24rem)] min-h-0 w-full shrink-0 flex-col border-b border-zinc-200/90 bg-zinc-50/98 dark:border-zinc-800 dark:bg-zinc-950/90 md:max-h-none md:h-full md:w-[min(100vw,24rem)] md:border-r md:border-b-0 lg:w-[26rem] xl:w-[28.5rem]"
+        className="flex max-h-[min(48vh,24rem)] min-h-0 w-full shrink-0 flex-col border-b border-zinc-200/80 bg-zinc-50/98 dark:border-zinc-800/80 dark:bg-zinc-950/90 md:max-h-none md:h-full md:w-[min(100vw,24rem)] md:border-r md:border-b-0 lg:w-[26rem] xl:w-[28.5rem]"
         aria-label="Filters"
       >
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 md:px-4 md:py-4">
           <div className="space-y-3">
-            <div className="rounded-xl border border-zinc-200/90 bg-white/90 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950/70">
-              <p className="truncate font-mono text-[10px] text-zinc-700 dark:text-zinc-300">
-                {apiHost}/api/logs
+            <div className="rounded-xl border border-zinc-200/80 bg-white/90 px-3 py-2.5 dark:border-zinc-800/80 dark:bg-zinc-950/70">
+              <p className="flex items-center gap-1.5 truncate font-mono text-[10px] text-zinc-700 dark:text-zinc-300">
+                <span
+                  className="inline-block size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.18)]"
+                  aria-hidden
+                />
+                <span className="truncate">{apiHost}/api/logs</span>
               </p>
-              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
-                <span>{appliedLimit}</span>
+              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
+                <span className="rounded bg-zinc-100 px-1 dark:bg-zinc-900">
+                  limit {appliedLimit}
+                </span>
                 {pagination && (
-                  <>
-                    <span className="text-zinc-300 dark:text-zinc-700">·</span>
-                    <span>
-                      {pagination.total} tot ·{" "}
-                      {pagination.page}/{pagination.pages}
-                    </span>
-                  </>
+                  <span className="rounded bg-zinc-100 px-1 dark:bg-zinc-900">
+                    {pagination.total} total · {pagination.page}/{pagination.pages}
+                  </span>
                 )}
               </p>
               {(appliedStartDate || appliedEndDate) && (
@@ -531,7 +534,7 @@ export function LogViewer({
                   onClick={() => resetAllClientFilters()}
                 />
                 <LevelChip
-                  label="Err"
+                  label="Error"
                   count={counts.error}
                   active={levelFilter === "error"}
                   tone="error"
@@ -687,31 +690,39 @@ export function LogViewer({
 
       {/* Right · log stream (below filters on narrow screens) */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col border-zinc-200 dark:border-zinc-800">
-        <header className="shrink-0 border-b border-zinc-200/90 bg-white/95 px-4 py-2.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 md:px-5">
+        <header className="shrink-0 border-b border-zinc-200/80 bg-white/80 px-4 py-3 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80 md:px-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
+              {activeService && (
+                <span
+                  className="shrink-0 text-[13px] text-zinc-300 dark:text-zinc-600"
+                  aria-hidden
+                >
+                  Logs /
+                </span>
+              )}
               <h1 className="min-w-0 truncate text-base font-semibold tracking-tight md:text-lg">
                 {activeService ?? "Logs"}
               </h1>
               <span
-                className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
+                className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
                   env === "prod"
-                    ? "bg-red-500/12 text-red-800 ring-red-500/30 dark:text-red-200"
-                    : "bg-amber-500/12 text-amber-950 ring-amber-500/30 dark:text-amber-100"
+                    ? "bg-red-500/12 text-red-700 ring-red-500/30 dark:text-red-200"
+                    : "bg-amber-500/12 text-amber-800 ring-amber-500/30 dark:text-amber-100"
                 }`}
                 title={apiHost}
               >
                 {env === "prod" ? "prod" : "staging"}
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <p className="font-mono text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
-                {error ? "—" : `${filteredSorted.length}/${initialLogs.length}`}
-              </p>
+            <div className="flex items-center gap-2.5">
+              <span className="rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-[11px] tabular-nums text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                {error ? "—" : `${filteredSorted.length} / ${initialLogs.length}`}
+              </span>
               <button
                 type="button"
                 onClick={() => logout()}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-[10px] font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
               >
                 Log out
               </button>
@@ -734,13 +745,29 @@ export function LogViewer({
               {error}
             </div>
           ) : initialLogs.length === 0 ? (
-            <p className="text-[14px] text-zinc-600 dark:text-zinc-400">
-              No logs returned.
-            </p>
+            <div className="mx-auto mt-16 max-w-xs rounded-2xl border border-dashed border-zinc-200 px-6 py-10 text-center dark:border-zinc-800">
+              <p className="font-mono text-2xl text-zinc-300 dark:text-zinc-700">
+                ( )
+              </p>
+              <p className="mt-2 text-[13px] font-medium text-zinc-600 dark:text-zinc-300">
+                No logs returned
+              </p>
+              <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                Try a wider time range or a higher limit.
+              </p>
+            </div>
           ) : filteredSorted.length === 0 ? (
-            <p className="text-[13px] text-zinc-600 dark:text-zinc-400">
-              No matches · relax filters (←)
-            </p>
+            <div className="mx-auto mt-16 max-w-xs rounded-2xl border border-dashed border-zinc-200 px-6 py-10 text-center dark:border-zinc-800">
+              <p className="font-mono text-2xl text-zinc-300 dark:text-zinc-700">
+                ∅
+              </p>
+              <p className="mt-2 text-[13px] font-medium text-zinc-600 dark:text-zinc-300">
+                No matches
+              </p>
+              <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                Relax the filters in the left panel.
+              </p>
+            </div>
           ) : (
             <ul className="flex flex-col gap-2 pb-12">
               {filteredSorted.map((log, i) => (

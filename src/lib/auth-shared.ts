@@ -66,7 +66,7 @@ export function writeSessionCookies(
     store.set(REFRESH_COOKIE, input.refreshToken, base);
   }
   const ttl = input.expiresIn && input.expiresIn > 0 ? input.expiresIn : 3600;
-  store.set(EXPIRY_COOKIE, String(Date.now() + ttl * 1000), {
+  store.set(EXPIRY_COOKIE, String(Date.now() + ttl * 10000), {
     ...base,
     httpOnly: false,
   });

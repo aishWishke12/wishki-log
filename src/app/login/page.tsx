@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent, ClipboardEvent } from "react";
@@ -166,15 +167,30 @@ export default function LoginPage() {
 
   return (
     <div className="flex h-[100dvh] w-full items-center justify-center bg-zinc-100 px-4 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200/95 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/70">
-        <p className="text-[16px] font-bold text-zinc-500 dark:text-zinc-400">
-          {step === "credentials"
-            ? "Admin sign in"
-            : "Enter the code from your authenticator app"}
-        </p>
+      <div className="w-full max-w-sm rounded-2xl border border-zinc-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-sm dark:border-zinc-800/80 dark:bg-zinc-950/70">
+        <div className="mb-5 flex items-center gap-2.5">
+          <Image
+            src="/logo.png"
+            alt=""
+            width={32}
+            height={32}
+            priority
+            className="size-8 shrink-0 rounded-lg ring-1 ring-black/5 dark:ring-white/10"
+          />
+          <div className="min-w-0">
+            <h1 className="text-[15px] font-semibold leading-none tracking-tight">
+              Wishki&nbsp;Log
+            </h1>
+            <p className="mt-1 text-[11px] leading-none text-zinc-500 dark:text-zinc-400">
+              {step === "credentials"
+                ? "Admin sign in"
+                : "Two-factor verification"}
+            </p>
+          </div>
+        </div>
 
         {step === "credentials" ? (
-          <form onSubmit={onCredentialsSubmit} className="mt-2 flex flex-col gap-3">
+          <form onSubmit={onCredentialsSubmit} className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
               <div className="grid grid-cols-2 gap-1 rounded-xl border border-zinc-200 p-0.5 dark:border-zinc-700">
                 {ENV_OPTIONS.map((opt) => (
@@ -244,7 +260,7 @@ export default function LoginPage() {
             </button>
           </form>
         ) : (
-          <form onSubmit={onMfaSubmit} className="mt-5 flex flex-col gap-3">
+          <form onSubmit={onMfaSubmit} className="flex flex-col gap-3">
             {mfaBoxes}
 
             {error && (

@@ -42,7 +42,7 @@ export function ServiceTabs({
   return (
     <nav
       aria-label="Services"
-      className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-zinc-200/90 bg-zinc-50/85 px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-950/85 md:px-5"
+      className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-zinc-200/80 bg-white/70 px-3 py-2 shadow-[0_1px_2px_-1px_rgba(0,0,0,0.06)] backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/70 md:px-5"
     >
       <TabLink
         href={`/${suffix}`}
@@ -81,7 +81,7 @@ function Divider() {
   return (
     <span
       aria-hidden
-      className="mx-1 h-4 w-px shrink-0 bg-zinc-300 dark:bg-zinc-700"
+      className="mx-1.5 h-5 w-px shrink-0 bg-zinc-200 dark:bg-zinc-800"
     />
   );
 }
@@ -106,18 +106,18 @@ function TabLink({
       prefetch={false}
       data-active={active}
       title={label}
-      className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 py-1 font-mono text-[11px] transition ${
+      className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium transition ${
         active
-          ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+          ? "border-zinc-900 bg-zinc-900 text-white shadow-sm dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
           : muted
-            ? "border-transparent text-zinc-400 hover:bg-zinc-100 dark:text-zinc-600 dark:hover:bg-zinc-900"
-            : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            ? "border-dashed border-zinc-200 text-zinc-400 hover:border-zinc-300 hover:text-zinc-600 dark:border-zinc-800 dark:text-zinc-600 dark:hover:border-zinc-700 dark:hover:text-zinc-400"
+            : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
       }`}
     >
       <span className="max-w-[11rem] truncate">{label}</span>
       {count > 0 && (
         <span
-          className={`rounded px-1 text-[10px] tabular-nums ${
+          className={`rounded-full px-1.5 text-[10px] font-semibold tabular-nums ${
             active
               ? "bg-white/20 text-white dark:bg-black/15 dark:text-zinc-900"
               : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"

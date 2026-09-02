@@ -2,9 +2,9 @@ import moment from "moment-timezone";
 
 import type { LogsApiResponse } from "@/types/log";
 
-export const DEFAULT_LOG_LIMIT = 1000;
+export const DEFAULT_LOG_LIMIT = 10000;
 export const LOG_LIMIT_MIN = 50;
-export const LOG_LIMIT_MAX = 10000;
+export const LOG_LIMIT_MAX = 100000;
 
 /** Thrown when the logs API rejects the bearer token (401/403). */
 export class LogsAuthError extends Error {
@@ -130,7 +130,7 @@ export async function fetchServiceNames(opts: {
 }
 
 type ServiceNamesCacheEntry = { at: number; names: string[] };
-const SERVICE_NAMES_TTL_MS = 5 * 60 * 1000;
+const SERVICE_NAMES_TTL_MS = 5 * 60 * 10000;
 const serviceNamesCache = new Map<string, ServiceNamesCacheEntry>();
 
 /**
